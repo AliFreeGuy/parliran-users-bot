@@ -5,22 +5,40 @@ from utils import filters as f
 from pyrogram.types import InputMediaVideo
 from utils import logger
 from utils import cache
+from config import ADMIN
 
 @Client.on_message(filters.private & f.user_is_join ,group=1)
 async def user_panel(client , message ):
-    data  = get_date_info()
+    if message.text :
+        if message.text == '/start' : 
+            await start_manager(client , message)
+        
+        elif message.text == 'امار' : 
+             await users_count(client ,message )
 
+
+
+
+
+async def users_count(client , message ):
+    if message.from_user.id == ADMIN : 
+         counts  = len(cache.redis.keys(f'majles-user:*'))
+         await client.send_message(chat_id = message.from_user.id , text = f'امار کاربران ربات : {str(counts)}')
+        
+
+
+
+
+async def start_manager(client, message ):
+    data  = get_date_info()
     time = get_date_info()
     record_keys = cache.redis.keys(f'recorder:*')
     now_records = []
-
     for record_date in record_keys:
         now = time['now_date'].replace('/' , '-')
         rdate = cache.redis.hget(record_date , 'date')[:-3].replace('/' , '-')
         if now == rdate:
                 now_records.append(cache.redis.hget(record_date , 'date'))
-                
-    
     now_records = sorted(list(set(now_records)))
     await client.send_message(chat_id = message.from_user.id ,
                                text = text.records_lists(data) ,
