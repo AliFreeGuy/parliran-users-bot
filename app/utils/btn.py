@@ -36,17 +36,21 @@ def parliran_lists_btn(data , now_records):
 
 
 
+def to_day_records_btn(records):
+        
+    buttons = []
+    persian_numbers = ['اول', 'دوم', 'سوم', 'چهارم', 'پنجم']  
+    buttons = []
+    for idx, record in enumerate(records):
+        print(record)
+        text = f"دریافت نوبت {persian_numbers[idx]}"
+        buttons.append([InlineKeyboardButton(text=text, callback_data=f'get_rec_file:{record.replace("recorder:" , "")}')])
 
-# def parliran_records():
-
-#     # دریافت تاریخ امروز
-#     today = jdatetime.date.today()
-#     print(today)
-#     # استخراج سال و ماه
-#     year = today.year
-#     month = today.month
-
-#     print(f"تاریخ امروز: {year}-{month:02}")
+    buttons.append([
+        InlineKeyboardButton(text='🔙',callback_data=f'to_day_record:back'),
+        ])
+    return InlineKeyboardMarkup(buttons)
+    
 
 
 
