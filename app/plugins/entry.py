@@ -8,12 +8,6 @@ from utils import logger
 
 
 
-@Client.on_message(filters.private & f.user_is_join ,group=0)
-async def user_entry_manager(client , message ):
-    cache.redis.hmset(f'majles-user:{str(message.from_user.id)}' , {'name' : message.from_user.first_name , 'chat_id' : message.from_user.id})
-    await message.reply_text('hi user ')
-
-
 
 
 
