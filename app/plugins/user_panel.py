@@ -99,6 +99,7 @@ async def get_record(client , call ):
     def extract_number(item):
         return int(item.split(':')[1])
     sorted_items = sorted(records, key=extract_number)
+    print(sorted_items)
     try :
             await client.edit_message_text(
                                         chat_id = call.from_user.id ,
@@ -106,7 +107,9 @@ async def get_record(client , call ):
                                         text = text.get_record  ,
                                         reply_markup =btn.to_day_records_btn(sorted_items) ,
                                             )
-    except Exception as e :print(e)
+    except Exception as e :
+         print('hi user mother fucker ')
+         print(e)
 
 
     

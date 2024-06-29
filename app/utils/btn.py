@@ -39,7 +39,7 @@ def parliran_lists_btn(data , now_records):
 def to_day_records_btn(records):
         
     buttons = []
-    persian_numbers = ['اول', 'دوم', 'سوم', 'چهارم', 'پنجم']  
+    persian_numbers = ['اول', 'دوم', 'سوم', 'چهارم', 'پنجم' , 'ششم' , 'هفتم' , 'هشتم' , 'نهم' , 'دهم' , 'یازدهم' , 'دوازدهم' , 'سیزدهم' , 'چهاردهم' , 'پانزدهم']  
     buttons = []
     for idx, record in enumerate(records):
         print(record)
