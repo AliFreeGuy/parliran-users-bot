@@ -33,6 +33,7 @@ async def start_manager(client, message ):
     data  = get_date_info()
     time = get_date_info()
     record_keys = cache.redis.keys(f'recorder:*')
+    print(record_keys)
     now_records = []
     for record_date in record_keys:
         now = time['now_date'].replace('/' , '-')
@@ -97,7 +98,7 @@ async def get_record(client , call ):
 
 
     def extract_number(item):
-        return int(item.split(':')[1])
+        return item.split(':')[1]
     sorted_items = sorted(records, key=extract_number)
     print(sorted_items)
     try :

@@ -74,6 +74,7 @@ def checker(self):
                                 start_time = records_data[1]
                                 end_time = records_data[2].replace('.mp4' , '')
                                 if not cache.redis.exists(f'recorder:{video_name}'):
+                                    print('@@@@@@@@@@@@@@@@@@@@@@2viddo is @@@@@@@@@@@@@@@@@@@@@@@@@@@@2')
                                     data = {
                                         'url' : video_url ,
                                         'date'  : rec_date , 
@@ -82,6 +83,7 @@ def checker(self):
                                         'id' : f'recorder:{video_name}'
                                     }
                                     downloader.delay(data)
+                                else : print('..................... video already ..........................')
                                 
 
 
@@ -123,7 +125,12 @@ def downloader(self , data ):
     with bot : 
         caption = f'ضبط صحن علنی مجلس : {data["date"]}\nساعت شروع : {data["start_time"]}\nساعت پایان : {data["end_time"]}'
         vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL , video=file_path  , caption=caption)
-        print(vid_data)
+        data['file_id']  = vid_data.video.file_id
+        cache.redis.hmset(data['id'] , data)
+        try:os.remove(file_path)
+        except OSError as e :  print(f'ERROR : {file_path} - {str(e)}')
+
+
 
     
 
