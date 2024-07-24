@@ -123,9 +123,11 @@ def downloader(self , data ):
 
     
     with bot : 
+        print('... upload starting ... ')
         caption = f'ضبط صحن علنی مجلس : {data["date"]}\nساعت شروع : {data["start_time"]}\nساعت پایان : {data["end_time"]}'
-        vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL , video=file_path  , caption=caption)
+        vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL , video=file_path  , caption=caption , thumb = '/root/record-users/parliran-users-bot/app/utils/img.jpg' )
         data['file_id']  = vid_data.video.file_id
+        data['mid'] = vid_data.id
         cache.redis.hmset(data['id'] , data)
         try:os.remove(file_path)
         except OSError as e :  print(f'ERROR : {file_path} - {str(e)}')
@@ -166,6 +168,9 @@ def downloader(self , data ):
 
 
 #celery -A tasks worker --beat -Q downloader_queue --concurrency=1 -n downloader_worker@%h
+
+
+
 #celery -A tasks worker -Q uploader_queue --concurrency=1 -n uploader_worker@%h
 
 

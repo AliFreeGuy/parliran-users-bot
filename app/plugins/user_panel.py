@@ -5,7 +5,7 @@ from utils import filters as f
 from pyrogram.types import InputMediaVideo
 from utils import logger
 from utils import cache
-from config import ADMIN
+from config import ADMIN , BACKUP_CHANNEL
 
 @Client.on_message(filters.private & f.user_is_join ,group=1)
 async def user_panel(client , message ):
@@ -72,14 +72,18 @@ async def get_record_file(client , call ):
     try :
         recorder_id = call.data.split(':')[1]
         recorder = cache.redis.hgetall(f'recorder:{recorder_id}')
-        caption = f'''
-    ضبط صحن علنی مجلس : `{recorder['date']}`
-    ساعت شروع : `{recorder['start_time']}`
-    ساعت پایان : `{recorder['end_time']}`
+        message = await client.get_messages(BACKUP_CHANNEL, int(recorder['mid']))
+        await message.copy(call.from_user.id)
+    #     caption = f'''
+    # ضبط صحن علنی مجلس : `{recorder['date']}`
+    # ساعت شروع : `{recorder['start_time']}`
+    # ساعت پایان : `{recorder['end_time']}`
 
-    @AkhbarMajles_ir
-    '''
-        await client.send_video(chat_id = call.from_user.id , video = recorder['file_id']  , caption = caption)
+    # @AkhbarMajles_ir
+    # '''
+
+        # print(recorder['file_id'])
+        # await client.send_video(chat_id = call.from_user.id , video = recorder['file_id']  , caption = caption)
     except Exception as e :
           await alert(client , call , msg='فایلی یافت نشد !')
           print(e)
