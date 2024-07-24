@@ -33,7 +33,6 @@ async def start_manager(client, message ):
     data  = get_date_info()
     time = get_date_info()
     record_keys = cache.redis.keys(f'recorder:*')
-    print(record_keys)
     now_records = []
     for record_date in record_keys:
         now = time['now_date'].replace('/' , '-')
@@ -74,16 +73,7 @@ async def get_record_file(client , call ):
         recorder = cache.redis.hgetall(f'recorder:{recorder_id}')
         message = await client.get_messages(BACKUP_CHANNEL, int(recorder['mid']))
         await message.copy(call.from_user.id)
-    #     caption = f'''
-    # ضبط صحن علنی مجلس : `{recorder['date']}`
-    # ساعت شروع : `{recorder['start_time']}`
-    # ساعت پایان : `{recorder['end_time']}`
-
-    # @AkhbarMajles_ir
-    # '''
-
-        # print(recorder['file_id'])
-        # await client.send_video(chat_id = call.from_user.id , video = recorder['file_id']  , caption = caption)
+        await start_manager(client , call )
     except Exception as e :
           await alert(client , call , msg='فایلی یافت نشد !')
           print(e)
@@ -104,7 +94,6 @@ async def get_record(client , call ):
     def extract_number(item):
         return item.split(':')[1]
     sorted_items = sorted(records, key=extract_number)
-    print(sorted_items)
     try :
             await client.edit_message_text(
                                         chat_id = call.from_user.id ,
@@ -113,7 +102,7 @@ async def get_record(client , call ):
                                         reply_markup =btn.to_day_records_btn(sorted_items) ,
                                             )
     except Exception as e :
-         print('hi user mother fucker ')
+         print('hi user')
          print(e)
 
 

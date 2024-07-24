@@ -124,16 +124,21 @@ def downloader(self , data ):
     
     with bot : 
         print('... upload starting ... ')
-        caption = f'ضبط صحن علنی مجلس : {data["date"]}\nساعت شروع : {data["start_time"]}\nساعت پایان : {data["end_time"]}'
-        vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL , video=file_path  , caption=caption , thumb = '/root/record-users/parliran-users-bot/app/utils/img.jpg' )
-        data['file_id']  = vid_data.video.file_id
+        date_parts = data["date"].split("-")
+        formatted_date = f'{date_parts[0]}/{date_parts[1]}/{date_parts[2]}'
+        start_time_parts = data["start_time"].split("-")
+        formatted_start_time = f'{start_time_parts[0]}:{start_time_parts[1]}'
+        end_time_parts = data["end_time"].split("-")
+        formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
+        caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n📡 @AkhbarMajles_ir'
+        vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb='/root/record-users/parliran-users-bot/app/utils/img.jpg')
+        data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id
-        cache.redis.hmset(data['id'] , data)
-        try:os.remove(file_path)
-        except OSError as e :  print(f'ERROR : {file_path} - {str(e)}')
-
-
-
+        cache.redis.hmset(data['id'], data)
+        try:
+            os.remove(file_path)
+        except OSError as e:
+            print(f'ERROR : {file_path} - {str(e)}')
     
 
 
