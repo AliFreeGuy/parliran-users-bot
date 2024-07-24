@@ -16,6 +16,7 @@ sys.path.insert(0, parent_dir)
 import config
 from utils import cache
 from config import REDIS_DB, REDIS_HOST, REDIS_PORT
+from utils.utils import convert_numbers_to_persian
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
 app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
@@ -131,6 +132,7 @@ def downloader(self , data ):
         end_time_parts = data["end_time"].split("-")
         formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
         caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n✅ @AkhbarMajles_ir | اخبار مجلس'
+        caption = convert_numbers_to_persian(caption)
         vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb='/root/record-users/parliran-users-bot/app/utils/img.jpg')
         data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id

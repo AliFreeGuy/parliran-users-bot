@@ -5,6 +5,15 @@ import re
 from utils.cache import cache
 import jdatetime
 import datetime
+import arabic_reshaper
+from bidi.algorithm import get_display
+
+
+
+def convert_numbers_to_persian(text):
+    english_to_persian = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
+    return text.translate(english_to_persian)
+
 
 
 def smtp_to_date(timestamp):
