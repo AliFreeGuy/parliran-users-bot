@@ -130,7 +130,7 @@ def downloader(self , data ):
         formatted_start_time = f'{start_time_parts[0]}:{start_time_parts[1]}'
         end_time_parts = data["end_time"].split("-")
         formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
-        caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n📡 @AkhbarMajles_ir'
+        caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n✅ @AkhbarMajles_ir | اخبار مجلس'
         vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb='/root/record-users/parliran-users-bot/app/utils/img.jpg')
         data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id

@@ -5,7 +5,7 @@ from utils.utils import join_checker , alert
 from utils import text , btn
 from utils import filters as f
 from utils import logger
-
+from .user_panel import start_manager
 
 
 
@@ -51,6 +51,6 @@ async def joined_handler(client , call ):
             logger.info(f'user not join channel : {str(call.from_user.id)}')
         else :
             await client.delete_messages(call.from_user.id , call.message.id)
-            await client.send_message(call.from_user.id , text = text.start_text)
+            await start_manager(client , call )
             logger.info(f'user is join channel : {str(call.from_user.id)}')
 
