@@ -52,7 +52,7 @@ def parliran_lists_btn(data , now_records):
             row.append(InlineKeyboardButton(text=f'🎥 {convert_numbers_to_persian(now_records[i + 1]).replace("-" , "/")}', callback_data=f'get_record:{now_records[i + 1]}'))
         if i + 2 < len(now_records):
             row.append(InlineKeyboardButton(text=f'🎥 {convert_numbers_to_persian(now_records[i + 2]).replace("-" , "/")}', callback_data=f'get_record:{now_records[i + 2]}'))
-        buttons.append(row)
+            buttons.append(row)
     return InlineKeyboardMarkup(buttons)
 
 

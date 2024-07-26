@@ -15,6 +15,14 @@ def convert_numbers_to_persian(text):
     return text.translate(english_to_persian)
 
 
+def convert_date_to_farsi(date_str):
+    date_obj = jdatetime.date(*map(int, date_str.split('-')))
+    days_of_week = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"]
+    day_of_week = days_of_week[date_obj.weekday()]
+    months_of_year = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+    month_name = months_of_year[date_obj.month - 1]
+    final_str = f"{day_of_week} {date_obj.day} {month_name} {date_obj.year}"
+    return final_str
 
 def smtp_to_date(timestamp):
     gregorian_date = datetime.datetime.fromtimestamp(timestamp)

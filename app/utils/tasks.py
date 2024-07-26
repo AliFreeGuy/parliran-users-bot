@@ -6,7 +6,9 @@ from os.path import abspath, dirname
 import sys
 import requests
 from pyrogram import Client
+import jdatetime
 import time
+from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
 import yt_dlp
 import os
@@ -45,6 +47,56 @@ app.conf.task_queues = {
     },
     
 }
+
+
+
+
+def convert_date_to_farsi(date_str):
+    date_obj = jdatetime.date(*map(int, date_str.split('-')))
+    days_of_week = ["شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"]
+    day_of_week = days_of_week[date_obj.weekday()]
+    months_of_year = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+    month_name = months_of_year[date_obj.month - 1]
+    final_str = f"{day_of_week} {date_obj.day} {month_name} {date_obj.year}"
+    return final_str
+
+def draw_bold_text(draw, text, position, font, fill):
+    offsets = [(0, 0), (1, 0)]
+    for offset in offsets:
+        x_offset, y_offset = offset
+        draw.text((position[0] + x_offset, position[1] + y_offset), text, font=font, fill=fill)
+
+def create_thumbnail(data):
+    image = Image.open("/root/record-users/parliran-users-bot/app/utils/img.jpg")
+    draw = ImageDraw.Draw(image)
+    font_1 = ImageFont.truetype("vazir.ttf", 20)
+    font_2 = ImageFont.truetype("vazir.ttf", 16)
+
+    date_text = convert_date_to_farsi(data["date"])
+    date_position = (100, 95)
+    draw_bold_text(draw, date_text, date_position, font_1, "white")
+
+    start_time_parts = data["start_time"].split("-")
+    formatted_start_time = f'{start_time_parts[0]}:{start_time_parts[1]}'
+    end_time_parts = data["end_time"].split("-")
+    formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
+    other_text = f'از ساعت {formatted_start_time} تا {formatted_end_time}'
+    other_position = (120, 148)
+    draw_bold_text(draw, other_text, other_position, font_2, "black")
+
+    thumbnail_path = "/root/record-users/parliran-users-bot/app/utils/img_with_text.jpg"
+    image.save(thumbnail_path)
+    return thumbnail_path
+
+
+
+
+
+
+
+
+
+
 
 @app.task(name='tasks.checker', bind=True, default_retry_delay=1, queue='downloader_queue')
 def checker(self):
@@ -95,9 +147,8 @@ def checker(self):
 
 
 
-
 @app.task(name='tasks.downloader', bind=True, default_retry_delay=1, queue='downloader_queue')
-def downloader(self , data ):
+def downloader(self, data):
     time.sleep(2)
     print(data)
 
@@ -105,25 +156,24 @@ def downloader(self , data ):
         os.makedirs('files')
 
     folder_path = os.path.abspath('files')
-    file_path = f'{folder_path}/{data["id"].replace("recorder:" ,"" )}'
+    file_path = f'{folder_path}/{data["id"].replace("recorder:", "")}.mp4'
     
     ydl_opts = {
         'format': 'best',
-        'outtmpl': 'files/%(title)s.%(ext)s',
+        'outtmpl': file_path,
     }
-
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([data['url']])
 
-    
-    if config.DEBUG =='True':
+    thumbnail_path = create_thumbnail(data)
+
+    if config.DEBUG == 'True':
         bot = Client('dl-task', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN, proxy=config.PROXY)
     else:
         bot = Client('dl-task', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN)
 
-    
-    with bot : 
+    with bot:
         print('... upload starting ... ')
         date_parts = data["date"].split("-")
         formatted_date = f'{date_parts[0]}/{date_parts[1]}/{date_parts[2]}'
@@ -132,8 +182,9 @@ def downloader(self , data ):
         end_time_parts = data["end_time"].split("-")
         formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
         caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n✅ @AkhbarMajles_ir | اخبار مجلس'
+        # convert_numbers_to_persian function should be defined or imported
         caption = convert_numbers_to_persian(caption)
-        vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb='/root/record-users/parliran-users-bot/app/utils/img.jpg')
+        vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb=thumbnail_path)
         data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id
         cache.redis.hmset(data['id'], data)
@@ -141,9 +192,11 @@ def downloader(self , data ):
             os.remove(file_path)
         except OSError as e:
             print(f'ERROR : {file_path} - {str(e)}')
-    
 
-
+        try:
+            os.remove(thumbnail_path)
+        except OSError as e:
+            print(f'ERROR : {thumbnail_path} - {str(e)}')
 
 
 
