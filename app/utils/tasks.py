@@ -119,13 +119,14 @@ def checker(self):
 
                     for video_link in video_links:
                         video_name = video_link.get('href')
-                        if not video_name.endswith('_none.mp4'):
+                        if not video_name.endswith('_none.mp4') and not video_name.endswith('_none.mkv'):
                             if video_name != 'd608ff0f-1e84-456a-a4fa-eb385149cc45.mp4' :
                                 video_url = full_url + video_name
                                 records_data = video_name.split('_')
                                 rec_date = records_data[0]
                                 start_time = records_data[1]
-                                end_time = records_data[2].replace('.mp4' , '')
+                                end_time = records_data[2].replace('.mp4' , '').replace('.mkv', '')
+                                
                                 if not cache.redis.exists(f'recorder:{video_name}'):
                                     print('@@@@@@@@@@@@@@@@@@@@@@2viddo is @@@@@@@@@@@@@@@@@@@@@@@@@@@@2')
                                     data = {
@@ -185,6 +186,7 @@ def downloader(self, data):
         # convert_numbers_to_persian function should be defined or imported
         caption = convert_numbers_to_persian(caption)
         vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb=thumbnail_path)
+        vid_data.copy('accroot')
         data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id
         cache.redis.hmset(data['id'], data)
