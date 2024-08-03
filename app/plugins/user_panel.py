@@ -33,6 +33,7 @@ async def start_manager(client, message ):
     data  = get_date_info()
     time = get_date_info()
     record_keys = cache.redis.keys(f'recorder:*')
+    print(record_keys)
     now_records = []
     for record_date in record_keys:
         now = time['now_date'].replace('/' , '-')
@@ -40,6 +41,7 @@ async def start_manager(client, message ):
         if now == rdate:
                 now_records.append(cache.redis.hget(record_date , 'date'))
     now_records = sorted(list(set(now_records)))
+    print(now_records)
     await client.send_message(chat_id = message.from_user.id ,
                                text = text.records_lists(data) ,
                                  reply_markup = btn.parliran_lists_btn(data , now_records)
@@ -111,15 +113,20 @@ async def get_record(client , call ):
 
 async def show_days(client , call):
         status = call.data.split(':')
-        try :time = get_date_info(int(status[1]))
-        except : time = get_date_info()
+        try :
+            time = get_date_info(int(status[1]))
+        except Exception as e : 
+            print(e)
+            time = get_date_info()
         record_keys = cache.redis.keys(f'recorder:*')
         now_records = []
         for record_date in record_keys:
             now = time['now_date'].replace('/' , '-')
             rdate = cache.redis.hget(record_date , 'date')[:-3].replace('/' , '-')
+            
             if now == rdate:
                     now_records.append(cache.redis.hget(record_date , 'date'))
+        
         now_records = sorted(list(set(now_records)))
         try :
                     await client.edit_message_text(

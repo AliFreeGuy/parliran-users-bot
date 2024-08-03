@@ -16,9 +16,10 @@ def join_channels_url(channels):
     return InlineKeyboardMarkup(buttons)
 
 
-def parliran_lists_btn(data , now_records):
+def parliran_lists_btn(data, now_records):
+    print(now_records)
     
-  # دیکشنری تبدیل اعداد ماه به نام‌های فارسی
+    # دیکشنری تبدیل اعداد ماه به نام‌های فارسی
     months = {
         '01': 'فروردین',
         '02': 'اردیبهشت',
@@ -34,30 +35,34 @@ def parliran_lists_btn(data , now_records):
         '12': 'اسفند'
     }
     
+    # تفکیک سال و ماه از تاریخ فعلی
     year, month = data['now_date'].split('-')
-    persian_month = months[month]
+    persian_month = months.get(month, month)
     persian_date = f"🗓 {year} {persian_month}"
+    
+    # لیست برای دکمه‌ها
     buttons = []
-
+    
+    # دکمه‌های تغییر ماه
     buttons.append([
         InlineKeyboardButton(text='ماه قبل 👈', callback_data=f'date:{data["before_smtp"]}'),
         InlineKeyboardButton(text=convert_numbers_to_persian(persian_date), callback_data=f'date:{data["now_smtp"]}'),
         InlineKeyboardButton(text='👉 ماه بعد ', callback_data=f'date:{data["after_smtp"]}'),
     ])
-
+    
+    # تقسیم رکوردها به ردیف‌های سه‌تایی
     for i in range(0, len(now_records), 3):
         row = []
-        row.append(InlineKeyboardButton(text=f'🎥 {convert_numbers_to_persian(now_records[i]).replace("-" , "/")}', callback_data=f'get_record:{now_records[i]}'))
-        if i + 1 < len(now_records):
-            row.append(InlineKeyboardButton(text=f'🎥 {convert_numbers_to_persian(now_records[i + 1]).replace("-" , "/")}', callback_data=f'get_record:{now_records[i + 1]}'))
-        if i + 2 < len(now_records):
-            row.append(InlineKeyboardButton(text=f'🎥 {convert_numbers_to_persian(now_records[i + 2]).replace("-" , "/")}', callback_data=f'get_record:{now_records[i + 2]}'))
-            buttons.append(row)
+        for j in range(i, min(i + 3, len(now_records))):
+            record = now_records[j]
+            formatted_record = f'🎥 {convert_numbers_to_persian(record).replace("-", "/")}'
+            row.append(InlineKeyboardButton(text=formatted_record, callback_data=f'get_record:{record}'))
+        buttons.append(row)
+    
     return InlineKeyboardMarkup(buttons)
 
 
 def to_day_records_btn(records):
-        
     buttons = []
     persian_numbers = ['اول', 'دوم', 'سوم', 'چهارم', 'پنجم' , 'ششم' , 'هفتم' , 'هشتم' , 'نهم' , 'دهم' , 'یازدهم' , 'دوازدهم' , 'سیزدهم' , 'چهاردهم' , 'پانزدهم']  
     buttons = []

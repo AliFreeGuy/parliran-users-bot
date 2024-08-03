@@ -24,6 +24,8 @@ r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=
 app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
 app.conf.timezone = 'UTC'
 
+
+
 app.conf.update(
     task_serializer='json',
     result_serializer='json',
@@ -170,9 +172,9 @@ def downloader(self, data):
     thumbnail_path = create_thumbnail(data)
 
     if config.DEBUG == 'True':
-        bot = Client('dl-task', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN, proxy=config.PROXY)
+        bot = Client('uploader', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN, proxy=config.PROXY)
     else:
-        bot = Client('dl-task', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN)
+        bot = Client('uploader', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN)
 
     with bot:
         print('... upload starting ... ')
@@ -183,10 +185,9 @@ def downloader(self, data):
         end_time_parts = data["end_time"].split("-")
         formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
         caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n✅ @AkhbarMajles_ir | اخبار مجلس'
-        # convert_numbers_to_persian function should be defined or imported
         caption = convert_numbers_to_persian(caption)
         vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb=thumbnail_path)
-        vid_data.copy('accroot')
+        vid_data.copy(config.PARLIRAN_CHANNEL)
         data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id
         cache.redis.hmset(data['id'], data)
