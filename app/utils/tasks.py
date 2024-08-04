@@ -4,6 +4,7 @@ from celery.schedules import crontab
 import redis
 from os.path import abspath, dirname
 import sys
+import os
 import requests
 from pyrogram import Client
 import jdatetime
@@ -23,6 +24,17 @@ from utils.utils import convert_numbers_to_persian
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
 app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
 app.conf.timezone = 'UTC'
+
+
+
+def get_file_size(file_path):
+    size_bytes = os.path.getsize(file_path)
+    size_mb = size_bytes / (1024 * 1024)
+    if size_mb > 1000:
+        size_gb = size_mb / 1024
+        return f'{size_gb:.2f} گیگابایت'
+    else:
+        return f'{size_mb:.2f} مگابایت'
 
 
 
@@ -170,6 +182,7 @@ def downloader(self, data):
         ydl.download([data['url']])
 
     thumbnail_path = create_thumbnail(data)
+    date_farsi = convert_date_to_farsi(data["date"])
 
     if config.DEBUG == 'True':
         bot = Client('uploader', api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN, proxy=config.PROXY)
@@ -178,19 +191,32 @@ def downloader(self, data):
 
     with bot:
         print('... upload starting ... ')
+        
+        # Format date and time
         date_parts = data["date"].split("-")
         formatted_date = f'{date_parts[0]}/{date_parts[1]}/{date_parts[2]}'
         start_time_parts = data["start_time"].split("-")
         formatted_start_time = f'{start_time_parts[0]}:{start_time_parts[1]}'
         end_time_parts = data["end_time"].split("-")
         formatted_end_time = f'{end_time_parts[0]}:{end_time_parts[1]}'
-        caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\nساعت شروع : {formatted_start_time}\nساعت پایان : {formatted_end_time}\n\n✅ @AkhbarMajles_ir | اخبار مجلس'
+        
+        # Get video size
+        video_size = get_file_size(file_path)
+        
+        # Create caption
+        caption = f'🎥 ضبط صحن علنی مجلس : {formatted_date}\n🗓 تاریخ : {date_farsi}\n🔹 ساعت شروع : {formatted_start_time}\n🔹ساعت پایان : {formatted_end_time}\n🔸حجم {video_size}\n\n✅  https://t.me/+JGkmcOPXqjw1Yjhi'
         caption = convert_numbers_to_persian(caption)
+        
+        # Upload video
         vid_data = bot.send_video(chat_id=config.BACKUP_CHANNEL, video=file_path, caption=caption, thumb=thumbnail_path)
         vid_data.copy(config.PARLIRAN_CHANNEL)
+        
+        # Update cache
         data['file_id'] = vid_data.video.file_id
         data['mid'] = vid_data.id
         cache.redis.hmset(data['id'], data)
+        
+        # Remove files
         try:
             os.remove(file_path)
         except OSError as e:
@@ -200,8 +226,6 @@ def downloader(self, data):
             os.remove(thumbnail_path)
         except OSError as e:
             print(f'ERROR : {thumbnail_path} - {str(e)}')
-
-
 
 
 
